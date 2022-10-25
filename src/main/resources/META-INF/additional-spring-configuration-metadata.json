@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "app.elasticsearch.uris",
+      "type": "java.lang.String",
+      "description": "elasticsearch uri list."
+    },
+    {
+      "name": "app.elasticsearch.username",
+      "type": "java.lang.String",
+      "description": "elasticsearch username."
+    },
+    {
+      "name": "app.elasticsearch.password",
+      "type": "java.lang.String",
+      "description": "elasticsearch password."
+    }
+  ]
+}

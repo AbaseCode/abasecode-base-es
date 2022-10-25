@@ -1,0 +1,8 @@
+server:
+  port: 8888
+app:
+  elasticsearch:
+    uris:
+      - http://192.168.3.230:9200
+    username: elastic
+    password: Es789456
