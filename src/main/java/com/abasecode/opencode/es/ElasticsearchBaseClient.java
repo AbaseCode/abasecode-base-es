@@ -494,6 +494,21 @@ public class ElasticsearchBaseClient<T extends BaseT> {
     }
 
     /**
+     * query fields by json.
+     * notice: Json must specify the fields to be returned
+     * @param index index
+     * @param json json
+     * @return List<Map<String, JsonData>>
+     * @throws IOException
+     */
+    public List<Map<String, JsonData>> queryFieldsByJson(String index, String json) throws IOException {
+        SearchResponse<Object> response = client.search(getSearchRequest(index, json, null), Object.class);
+        List<Map<String, JsonData>> list = new ArrayList<>();
+        response.hits().hits().stream().forEach(t -> list.add(t.fields()));
+        return list;
+    }
+
+    /**
      * query by json with page
      *
      * @param index       index
@@ -524,6 +539,37 @@ public class ElasticsearchBaseClient<T extends BaseT> {
     public Page<T> queryByJsonWithPage(String index, String json, Integer pageNum, Integer pageSize, Class<T> clazz) throws IOException {
         PageRequest pageRequest = PageRequest.of(pageNum, pageSize);
         return queryByJsonWithPage(index, json, pageRequest, clazz);
+    }
+
+    /**
+     * query fields by json with page
+     * notice: Json must specify the fields to be returned
+     * @param index index
+     * @param json json
+     * @param pageRequest pageRequest
+     * @return Page<T>
+     * @throws IOException
+     */
+    public Page<Map<String, JsonData>> queryFieldsByJsonWithPage(String index, String json, PageRequest pageRequest) throws IOException {
+        SearchResponse<Object> response = client.search(getSearchRequest(index, json, pageRequest), Object.class);
+        List<Map<String, JsonData>> list = new ArrayList<>();
+        response.hits().hits().stream().forEach(t -> list.add(t.fields()));
+        return new PageImpl<>(list, pageRequest, response.hits().total().value());
+    }
+
+    /**
+     * query by json with page
+     * notice: Json must specify the fields to be returned
+     * @param index    index
+     * @param json     json
+     * @param pageNum  pageNum
+     * @param pageSize pageSize
+     * @return Page<T>
+     * @throws IOException
+     */
+    public Page<Map<String, JsonData>> queryFieldsByJsonWithPage(String index, String json, Integer pageNum, Integer pageSize) throws IOException {
+        PageRequest pageRequest = PageRequest.of(pageNum, pageSize);
+        return queryFieldsByJsonWithPage(index, json, pageRequest);
     }
 
     /**

@@ -7,12 +7,19 @@ import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
+import co.elastic.clients.json.JsonpMapper;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.abasecode.opencode.es.annotation.EnableCodeEs;
 import com.abasecode.opencode.es.config.AutoConfiguration;
 import com.abasecode.opencode.es.config.ElasticsearchConfig;
+import com.abasecode.opencode.es.entity.Job;
 import com.abasecode.opencode.es.entity.Product;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -43,6 +50,7 @@ import java.util.*;
 public class ElasticsearchBaseClientTest {
 
     ElasticsearchBaseClient<Product> baseClient;
+    ElasticsearchBaseClient<Job> baseClient2;
     String INDEX_NAME = "product";
 
     //    @BeforeEach
@@ -64,6 +72,7 @@ public class ElasticsearchBaseClientTest {
         transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
         client = new ElasticsearchClient(transport);
         baseClient = new ElasticsearchBaseClient<>(client, transport);
+
     }
 
     @BeforeEach
@@ -73,6 +82,7 @@ public class ElasticsearchBaseClientTest {
         esConfig.setUsername("elastic");
         esConfig.setUris(Arrays.asList("http://192.168.3.230:9200"));
         baseClient = new ElasticsearchBaseClient<>(esConfig);
+        baseClient2 = new ElasticsearchBaseClient<>(esConfig);
     }
 
 
@@ -292,6 +302,21 @@ public class ElasticsearchBaseClientTest {
     }
 
     @Test
+    void queryFieldsByJson() throws IOException {
+        String json = "{" +
+                "  \"_source\": false, " +
+                "  \"query\": {" +
+                "    \"match_all\": {}" +
+                "  }," +
+                "  \"fields\": [\"id\",\"jobName\",\"jobPosition\",\"company.name\"]," +
+                "  \"size\": 30" +
+                "}";
+        String index ="jobs";
+        List<Map<String, JsonData>> list = baseClient2.queryFieldsByJson(index, json);
+        System.out.println(list);
+    }
+
+    @Test
     void queryByJsonWithPage() throws IOException {
         String json = "{" +
                 "  \"query\": {" +
@@ -302,6 +327,23 @@ public class ElasticsearchBaseClientTest {
         int size = 10;
         Page<Product> p = baseClient.queryByJsonWithPage(INDEX_NAME, json, page, size, Product.class);
         p.getContent().stream().forEach(a -> System.out.println(a.getId()));
+    }
+
+    @Test
+    void queryFieldsByJsonWithPage() throws IOException {
+        String json = "{" +
+                "  \"_source\": false, " +
+                "  \"query\": {" +
+                "    \"match_all\": {}" +
+                "  }," +
+                "  \"fields\": [\"id\",\"jobName\",\"jobPosition\",\"company.name\"]" +
+                "}";
+        int page = 2;
+        int size = 10;
+        Page<Map<String, JsonData>> p = baseClient.queryFieldsByJsonWithPage("jobs", json, page, size);
+        List<Map<String, JsonData>> list = p.getContent();
+        int size1 = list.size();
+        p.getContent().stream().forEach(a -> System.out.println(a));
     }
 
 
