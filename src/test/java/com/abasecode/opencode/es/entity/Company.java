@@ -1,5 +1,6 @@
 package com.abasecode.opencode.es.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Company extends BaseT implements Serializable {
     /**
      * 简称
@@ -25,6 +27,34 @@ public class Company extends BaseT implements Serializable {
      * 名称
      */
     private String name;
+    /**
+     * 统一社会信用代码
+     */
+    private String creditCode;
+    /**
+     * 成立日期
+     */
+    private String startDate;
+    /**
+     * 法定代表人
+     */
+    private String represent;
+    /**
+     * 存续状态
+     */
+    private String status;
+    /**
+     * 企业工商注册号
+     */
+    private String no;
+    /**
+     * 注册资本
+     */
+    private String registerCapital;
+    /**
+     * 实缴资本
+     */
+    private String paidCapital;
     /**
      * LOGO
      */
@@ -73,4 +103,8 @@ public class Company extends BaseT implements Serializable {
      * 地址位置
      */
     private String location;
+    /**
+     * 省市县区镇
+     */
+    private Pcct pcct;
 }

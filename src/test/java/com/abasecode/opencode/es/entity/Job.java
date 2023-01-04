@@ -1,5 +1,6 @@
 package com.abasecode.opencode.es.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Job extends BaseT implements Serializable {
     /**
      * 职位名称
@@ -69,6 +71,10 @@ public class Job extends BaseT implements Serializable {
      * 地址位置
      */
     private String location;
+    /**
+     * 省市县区镇
+     */
+    private Pcct pcct;
     /**
      * 状态
      */

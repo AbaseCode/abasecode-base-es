@@ -37,6 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -72,10 +73,10 @@ public class ElasticsearchBaseClientTest {
         transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
         client = new ElasticsearchClient(transport);
         baseClient = new ElasticsearchBaseClient<>(client, transport);
-
+        baseClient2 = new ElasticsearchBaseClient<>(client, transport);
     }
 
-    @BeforeEach
+//    @BeforeEach
     public void start() {
         ElasticsearchConfig.EsConfig esConfig = new ElasticsearchConfig.EsConfig();
         esConfig.setPassword("Es789456");
@@ -472,5 +473,78 @@ public class ElasticsearchBaseClientTest {
                 "}";
         Long r = baseClient.updateByQueryWithJson(INDEX_NAME, json);
         System.out.println(r);
+    }
+
+
+    @Test
+    void queryGeo() throws IOException {
+
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY,
+                new UsernamePasswordCredentials("elastic", "Es789456"));
+
+        RestClientBuilder builder = RestClient.builder(
+                        new HttpHost("192.168.3.230", 9200)
+                )
+                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+                        .setDefaultCredentialsProvider(credentialsProvider));
+
+        RestClient restClient = builder.build();
+        ElasticsearchClient client;
+        RestClientTransport transport;
+        transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        client = new ElasticsearchClient(transport);
+
+
+        String json = "{\n" +
+                "  \"query\": {\n" +
+                "    \"geo_distance\":{\n" +
+                "      \"distance\":\"5km\",\n" +
+                "      \"location\":\"26.087061,119.288487\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"size\": 20,\n" +
+                "  \"from\": 0,\n" +
+                "  \"sort\": [\n" +
+                "    {\n" +
+                "      \"_geo_distance\": {\n" +
+                "        \"order\": \"asc\",\n" +
+                "        \"location\": \"26.087061,119.288487\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        String index ="jobs";
+
+//        List<Job> list = baseClient2.queryByJson("jobs", json, Job.class);
+
+        //todo getSearchRequest
+        SearchRequest request = SearchRequest.of(a -> a
+                .index(index)
+                .withJson(new StringReader(json))
+                .ignoreUnavailable(true)
+        );
+
+
+
+        //getSearchResponse
+//        client.search(getSearchRequest(index, json, pageRequest), clazz);
+        SearchResponse<Job> response = client.search(request, Job.class);
+        List<Job> list = new ArrayList<>();
+        response.hits().hits().stream().forEach(t -> list.add(t.source()));
+
+        System.out.println(list.size());
+
+
+//       baseClient2.queryByJson
+//        SearchResponse<T> response = getSearchResponse(index, json, null, clazz);
+//        List<T> list = new ArrayList<>();
+//        response.hits().hits().stream().forEach(t -> list.add(t.source()));
+//        return list;
+
+
+
+        list.stream().forEach(p -> System.out.println(p));
     }
 }
